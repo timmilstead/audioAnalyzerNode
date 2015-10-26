@@ -73,8 +73,8 @@ void audioAnalyzer::createInputAttributes()
 	MFnNumericAttribute numAttrFn;
 	MFnUnitAttribute unitAttrFn;
 
-	ASSERT_PASSED_MSTATUS(audioAttr = typedAttrFn.create("audio","a",MFnData::Type::kString,&status));
-	ASSERT_PASSED_MSTATUS(sampleSizeAttr = numAttrFn.create("sampleSize","sz",MFnNumericData::Type::kInt, 20, &status));
+	ASSERT_PASSED_MSTATUS(audioAttr = typedAttrFn.create("audio","a",MFnData::kString,&status));
+	ASSERT_PASSED_MSTATUS(sampleSizeAttr = numAttrFn.create("sampleSize","sz",MFnNumericData::kInt, 20, &status));
 	
 	ASSERT_PASSED_MSTATUS(scaleAttr =     numAttrFn.create("scale","s",MFnNumericData::kFloat, 1.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setStorable(true));
@@ -105,11 +105,11 @@ void audioAnalyzer::createIntermediateAttributes()
 	MFnNumericAttribute numAttrFn;
 	MFnTypedAttribute typedAttrFn;
 
-	ASSERT_PASSED_MSTATUS(sizeAttr = numAttrFn.create("size","size",MFnNumericData::Type::kLong, 0.0, &status));
+	ASSERT_PASSED_MSTATUS(sizeAttr = numAttrFn.create("size","size",MFnNumericData::kLong, 0.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 
-	ASSERT_PASSED_MSTATUS(sampleRateAttr = numAttrFn.create("sampleRate","sr",MFnNumericData::Type::kInt, 0, &status));
+	ASSERT_PASSED_MSTATUS(sampleRateAttr = numAttrFn.create("sampleRate","sr",MFnNumericData::kInt, 0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 
@@ -117,7 +117,7 @@ void audioAnalyzer::createIntermediateAttributes()
 	MFnFloatArrayData floatArrayDataFn;
 	MFloatArray floatArray(10,0.0f);
 	ASSERT_PASSED_MSTATUS(defaultData = floatArrayDataFn.create(floatArray,&status));
-	ASSERT_PASSED_MSTATUS(dataAttr = typedAttrFn.create("data","d",MFnData::Type::kFloatArray, defaultData ,&status));
+	ASSERT_PASSED_MSTATUS(dataAttr = typedAttrFn.create("data","d",MFnData::kFloatArray, defaultData ,&status));
 }
 
 void audioAnalyzer::createOutputAttributes()
@@ -127,19 +127,19 @@ void audioAnalyzer::createOutputAttributes()
 	MStatus status;
 	MFnNumericAttribute numAttrFn;
 
-	ASSERT_PASSED_MSTATUS(outputAttr = numAttrFn.create("output","o",MFnNumericData::Type::kFloat, 0.0, &status));
+	ASSERT_PASSED_MSTATUS(outputAttr = numAttrFn.create("output","o",MFnNumericData::kFloat, 0.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 
-	ASSERT_PASSED_MSTATUS(lowAttr = numAttrFn.create("low","l",MFnNumericData::Type::kFloat, 0.0, &status));
+	ASSERT_PASSED_MSTATUS(lowAttr = numAttrFn.create("low","l",MFnNumericData::kFloat, 0.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 
-	ASSERT_PASSED_MSTATUS(midAttr = numAttrFn.create("middle","m",MFnNumericData::Type::kFloat, 0.0, &status));
+	ASSERT_PASSED_MSTATUS(midAttr = numAttrFn.create("middle","m",MFnNumericData::kFloat, 0.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 
-	ASSERT_PASSED_MSTATUS(highAttr = numAttrFn.create("high","h",MFnNumericData::Type::kFloat, 0.0, &status));
+	ASSERT_PASSED_MSTATUS(highAttr = numAttrFn.create("high","h",MFnNumericData::kFloat, 0.0, &status));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setWritable(false));
 	ASSERT_RETURN_MSTATUS(numAttrFn.setKeyable(false));
 }
@@ -289,7 +289,7 @@ void audioAnalyzer::computeData(const MPlug&, MDataBlock& dataBlock)
 	ASSERT_RETURN_MSTATUS(dataHandle.set(arrayObject));
 
 	ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(sizeAttr, &status));
-	dataHandle.set(static_cast<long>(sfInfo.frames));
+	dataHandle.set(static_cast<int>(sfInfo.frames));
 
 	ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(sampleRateAttr, &status));
 	dataHandle.set(sfInfo.samplerate);
@@ -326,7 +326,7 @@ void audioAnalyzer::computeOutput(const MPlug& plug, MDataBlock& dataBlock)
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleSizeAttr,&status));
 		int sampleSize = dataHandle.asInt();
 
-		long middleIndexNo = static_cast<long>(time.as(MTime::Unit::kSeconds) * static_cast<double>(sampleRate));
+		long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
 		long startIndexNo = middleIndexNo - (sampleSize / 2);
 		long finishIndexNo = startIndexNo + sampleSize;
 		if (finishIndexNo > size) finishIndexNo = size;
@@ -390,7 +390,7 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 
 
 
-			long middleIndexNo = static_cast<long>(time.as(MTime::Unit::kSeconds) * static_cast<double>(sampleRate));
+			long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
 			long startIndexNo = middleIndexNo - (sampleRate / 2);
 			long finishIndexNo = startIndexNo + sampleRate / 2;
 
