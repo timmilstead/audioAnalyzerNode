@@ -337,7 +337,7 @@ void audioAnalyzer::computeOutput(const MPlug& plug, MDataBlock& dataBlock)
 		MFloatArray floatArray = floatArrayData.array();
 
 		float average = 0;
-		for (long indexNo = startIndexNo ; indexNo < finishIndexNo; indexNo++)
+		for (long indexNo = startIndexNo ; indexNo < finishIndexNo; ++indexNo)
 		{
 			if (indexNo >= 0 && indexNo < size)
 			{
@@ -383,21 +383,21 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleRateAttr,&status));
 		int sampleRate = dataHandle.asInt();
 
+		float fftSampleSize = 1024;
+		float spectralLineFrequencyResolution = static_cast<float>(sampleRate) / static_cast<float>(fftSampleSize);
 
 
 		long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
-		long startIndexNo = middleIndexNo - (sampleRate / 2);
-		long finishIndexNo = startIndexNo + sampleRate / 2;
-
-		long length = finishIndexNo - startIndexNo;
+		long startIndexNo = middleIndexNo - (fftSampleSize / 2);
+		long finishIndexNo = startIndexNo + fftSampleSize;
 
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(dataAttr,&status));
 		MObject arrayObject = dataHandle.data();
 		ASSERT_PASSED_MSTATUS(MFnFloatArrayData floatArrayData(arrayObject, &status));
 		MFloatArray floatArray = floatArrayData.array();
 
-		std::vector<float> values(length);
-		for (long indexNo = startIndexNo ; indexNo < finishIndexNo; indexNo++)
+		std::vector<float> values(fftSampleSize);
+		for (long indexNo = startIndexNo ; indexNo < finishIndexNo; ++indexNo)
 		{
 			if (indexNo >= 0 && indexNo < size)
 			{
@@ -409,7 +409,7 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 			}
 		}
 
-		std::vector<float> out(length / 2 + 1);
+		std::vector<float> out(fftSampleSize / 2 + 1);
 		DFFT::powerSpectrum(values,out);
 		
 		// Up to 250Hz
@@ -421,14 +421,15 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 		// 4kHz +
 		int highCount = 0;
 
-		for (long indexNo = 0; indexNo < (length / 2 +1); indexNo++)
+		for (long indexNo = 0; indexNo < (fftSampleSize / 2 +1); ++indexNo)
 		{
-			if (indexNo != 0 && indexNo < 250)
+			float frequency = indexNo * spectralLineFrequencyResolution;
+			if (indexNo != 0 && frequency < 250)
 			{
 				low += out[indexNo];
 				lowCount++;
 			}
-			else if (indexNo >= 250 && indexNo < 4000)
+			else if (frequency >= 250 && frequency < 4000)
 			{
 				mid += out[indexNo];
 				midCount++;
