@@ -370,147 +370,104 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 	float low = 0.0f;
 	float mid = 0.0f;
 	float high = 0.0f;
-	float* values = NULL;
-	fftwf_complex* out = NULL;
 	
-	try
+	ASSERT_PASSED_MSTATUS(MDataHandle dataHandle = dataBlock.inputValue(sizeAttr,&status));
+	long size = dataHandle.asLong();
+
+	if (size > 0)
 	{
 
-		ASSERT_PASSED_MSTATUS(MDataHandle dataHandle = dataBlock.inputValue(sizeAttr,&status));
-		long size = dataHandle.asLong();
+		ASSERT_PASSED_MSTATUS( dataHandle = dataBlock.inputValue(inputAttr,&status));
+		MTime time = dataHandle.asTime();
 
-		if (size > 0)
+		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleRateAttr,&status));
+		int sampleRate = dataHandle.asInt();
+
+
+
+		long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
+		long startIndexNo = middleIndexNo - (sampleRate / 2);
+		long finishIndexNo = startIndexNo + sampleRate / 2;
+
+		long length = finishIndexNo - startIndexNo;
+
+		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(dataAttr,&status));
+		MObject arrayObject = dataHandle.data();
+		ASSERT_PASSED_MSTATUS(MFnFloatArrayData floatArrayData(arrayObject, &status));
+		MFloatArray floatArray = floatArrayData.array();
+
+		std::vector<float> values(length);
+		for (long indexNo = startIndexNo ; indexNo < finishIndexNo; indexNo++)
 		{
-
-			ASSERT_PASSED_MSTATUS( dataHandle = dataBlock.inputValue(inputAttr,&status));
-			MTime time = dataHandle.asTime();
-
-			ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleRateAttr,&status));
-			int sampleRate = dataHandle.asInt();
-
-
-
-			long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
-			long startIndexNo = middleIndexNo - (sampleRate / 2);
-			long finishIndexNo = startIndexNo + sampleRate / 2;
-
-			long length = finishIndexNo - startIndexNo;
-
-			ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(dataAttr,&status));
-			MObject arrayObject = dataHandle.data();
-			ASSERT_PASSED_MSTATUS(MFnFloatArrayData floatArrayData(arrayObject, &status));
-			MFloatArray floatArray = floatArrayData.array();
-
-			values = new float[length];
-			for (long indexNo = startIndexNo ; indexNo < finishIndexNo; indexNo++)
+			if (indexNo >= 0 && indexNo < size)
 			{
-				if (indexNo >= 0 && indexNo < size)
-				{
-					values[indexNo - startIndexNo] = floatArray[indexNo];
-				}
-				else
-				{
-					values[indexNo - startIndexNo] = 0.0f;
-				}
+				values[indexNo - startIndexNo] = floatArray[indexNo];
 			}
-
-			// Do DFFT
-
-			out = new fftwf_complex[length / 2 + 1];
-			fftwf_plan plan = fftwf_plan_dft_r2c_1d(length, values, out, FFTW_ESTIMATE); // Computationally expensive if not FFTW_ESTIMATE
-			fftwf_execute(plan);
-			fftwf_destroy_plan(plan);
-
-			// Convert result into a power spectrum
-
-			//powerSpectrum = new double[length / 2 + 1];
-		
-		
-			// Up to 250Hz
-			float low = 0;
-			int lowCount = 0;
-
-			// 250Hz - 4kHz
-			float mid = 0;
-			int midCount = 0;
-
-			// 4kHz +
-			float high = 0;
-			int highCount = 0;
-
-			for (long indexNo = 0; indexNo < (length / 2 +1); indexNo++)
+			else
 			{
-				float powerSpectrum = sqrt(out[indexNo][0] * out[indexNo][0] + out[indexNo][1] * out[indexNo][1]) / sqrt(static_cast<float>(length));
-				//cerr << indexNo << " : " << powerSpectrum << endl;
-				if (indexNo != 0 && indexNo < 250)
-				{
-					low += powerSpectrum;
-					lowCount++;
-				}
-				else if (indexNo >= 250 && indexNo < 4000)
-				{
-					mid += powerSpectrum;
-					midCount++;
-				}
-				else
-				{
-					high += powerSpectrum;
-					highCount++;
-				}
-			
+				values[indexNo - startIndexNo] = 0.0f;
 			}
-
-			low /= lowCount;
-			ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(lowScaleAttr,&status));
-			float scale = dataHandle.asFloat();
-			low *= scale;
-
-			mid /= midCount;
-			ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(midScaleAttr,&status));
-			scale = dataHandle.asFloat();
-			mid *= scale;
-
-			high /= highCount;
-			ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(highScaleAttr,&status));
-			scale = dataHandle.asFloat();
-			high *= scale;
-
 		}
-		// Set low, mid, high
 
-		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(lowAttr, &status));
-		dataHandle.setFloat((float)low);
+		std::vector<float> out(length / 2 + 1);
+		DFFT::powerSpectrum(values,out);
+		
+		// Up to 250Hz
+		int lowCount = 0;
 
-		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(midAttr, &status));
-		dataHandle.setFloat((float)mid);
+		// 250Hz - 4kHz
+		int midCount = 0;
 
-		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(highAttr, &status));
-		dataHandle.setFloat((float)high);
+		// 4kHz +
+		int highCount = 0;
 
-		ASSERT_RETURN_MSTATUS(dataBlock.setClean(lowAttr));
-		ASSERT_RETURN_MSTATUS(dataBlock.setClean(midAttr));
-		ASSERT_RETURN_MSTATUS(dataBlock.setClean(highAttr));
+		for (long indexNo = 0; indexNo < (length / 2 +1); indexNo++)
+		{
+			if (indexNo != 0 && indexNo < 250)
+			{
+				low += out[indexNo];
+				lowCount++;
+			}
+			else if (indexNo >= 250 && indexNo < 4000)
+			{
+				mid += out[indexNo];
+				midCount++;
+			}
+			else
+			{
+				high += out[indexNo];
+				highCount++;
+			}			
+		}
 
-		// c++ doesn't have finally and we can't use RAII with the heap allocated arrays required by FFTW
-		if (values != NULL) delete[] values;
-		values = NULL;
-		if (out != NULL) delete[] values;
-		out = NULL;
+		low /= lowCount;
+		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(lowScaleAttr,&status));
+		float scale = dataHandle.asFloat();
+		low *= scale;
+
+		mid /= midCount;
+		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(midScaleAttr,&status));
+		scale = dataHandle.asFloat();
+		mid *= scale;
+
+		high /= highCount;
+		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(highScaleAttr,&status));
+		scale = dataHandle.asFloat();
+		high *= scale;
+
 	}
-	catch(const MayaException& exception)
-	{
-		// c++ doesn't have finally and we can't use RAII with the heap allocated arrays required by FFTW
-		if (values != NULL) delete[] values;
-		values = NULL;
-		if (out != NULL) delete[] values;
-		out = NULL;
-		throw exception;
-	}
-	// c++ doesn't have finally and we can't use RAII with heap allocated arrays
-	if (values != NULL) delete[] values;
-	values = NULL;
-	if (out != NULL) delete[] values;
-	out = NULL;
+	// Set low, mid, high
+
+	ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(lowAttr, &status));
+	dataHandle.setFloat((float)low);
+	ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(midAttr, &status));
+	dataHandle.setFloat((float)mid);
+	ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.outputValue(highAttr, &status));
+	dataHandle.setFloat((float)high);
+
+	ASSERT_RETURN_MSTATUS(dataBlock.setClean(lowAttr));
+	ASSERT_RETURN_MSTATUS(dataBlock.setClean(midAttr));
+	ASSERT_RETURN_MSTATUS(dataBlock.setClean(highAttr));
 }
 
 /** (Virtual) destructor.

@@ -3,10 +3,14 @@
 #ifndef AUDIO_ANALYZER_NODE_H
 #define AUDIO_ANALYZER_NODE_H
 
+// -------- Language Headers --------
+
 #include <string.h>
-#include <maya/MIOStream.h>
+#include <maya/MIOStream.h> // Needs to come here
 #include <math.h>
 #include <ctime>
+
+// -------- Maya Headers --------
 
 #include <maya/MPxNode.h> 
 #include <maya/MFnNumericAttribute.h>
@@ -24,11 +28,16 @@
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MTime.h>
 
+// -------- Library Headers --------
+
 #include <sndfile.h>
 #include <fftw3.h>
 
+// -------- Project Headers --------
+
 #include "Util.h"
 #include "MayaException.h"
+#include "DFFT.h"
 
 // -------- Class Declaration --------
 
