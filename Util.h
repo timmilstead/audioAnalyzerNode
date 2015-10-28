@@ -8,7 +8,7 @@
 // Provide switchable tracing (debug) output without the overhead of an if statement
 
 // Uncomment/comment as to enable/disable trace output
-#define TRACE
+//#define TRACE
 
 #ifndef TRACE_OUTPUT
 #ifdef TRACE
@@ -16,7 +16,7 @@
 #define TRACE_OUTPUT(message) cerr << message << endl;
 #endif
 #ifndef TRACE
-#define TRACE_OUTPUT(message) //cerr << message << endl;
+#define TRACE_OUTPUT(message)
 #endif
 #endif
 
