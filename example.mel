@@ -2,17 +2,28 @@
 // Change audio paths to match
 
 createNode audioAnalyzer;
-setAttr "audioAnalyzer1.lowScale" 25;
-setAttr "audioAnalyzer1.middleScale" 200;
-setAttr "audioAnalyzer1.highScale" 2000;
+setAttr "audioAnalyzer1.lowScale" 10;
+setAttr "audioAnalyzer1.middleScale" 40;
+setAttr "audioAnalyzer1.highScale" 400;
 
 setAttr -type "string" audioAnalyzer1.audio "C:\\Users\\tim\\Documents\\audioAnalyzerNode\\Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
 
 file -import -type "audio"  -ignoreVersion -ra true -mergeNamespacesOnClash false -namespace "Gorowski_-_01_-_Universal_Warrior_Special_Edition" -options "o=0"  -pr "C:/Users/tim/Documents/audioAnalyzerNode/Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
 
+string $lambert1 = `createNode lambert`;
+setAttr ($lambert1 + ".color") 1 0 0;
+polyCube -ch on -o on -cuv 4;
+hyperShade -assign $lambert1;
+
+string $lambert2 = `createNode lambert`;
+setAttr ($lambert2 + ".color") 0 1 0;
 polyCube -ch on -o on -cuv 4 ;
+hyperShade -assign $lambert2;
+
+string $lambert3 = `createNode lambert`;
+setAttr ($lambert3 + ".color") 0 0 1;
 polyCube -ch on -o on -cuv 4 ;
-polyCube -ch on -o on -cuv 4 ;
+hyperShade -assign $lambert3;
 
 connectAttr time1.outTime audioAnalyzer1.input;
 
