@@ -1,7 +1,10 @@
+// Copy and paste into the Script Editor
+// Change audio paths to match
+
 createNode audioAnalyzer;
-setAttr "audioAnalyzer1.lowScale" 200;
+setAttr "audioAnalyzer1.lowScale" 25;
 setAttr "audioAnalyzer1.middleScale" 200;
-setAttr "audioAnalyzer1.highScale" 200;
+setAttr "audioAnalyzer1.highScale" 2000;
 
 setAttr -type "string" audioAnalyzer1.audio "C:\\Users\\tim\\Documents\\audioAnalyzerNode\\Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
 
@@ -16,3 +19,5 @@ connectAttr time1.outTime audioAnalyzer1.input;
 connectAttr audioAnalyzer1.low pCube1.translateX;
 connectAttr audioAnalyzer1.middle pCube2.translateY;
 connectAttr audioAnalyzer1.high pCube3.translateZ;
+
+playbackOptions -maxTime 10000;
