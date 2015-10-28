@@ -60,7 +60,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;_USRDLL;NT_PLUGIN;_HAS_ITERATOR_DEBUGGING=0;_SECURE_SCL=0;_SECURE_SCL_THROWS=0;_SECURE_SCL_DEPRECATE=0;_CRT_SECURE_NO_DEPRECATE;TBB_USE_DEBUG=0;__TBB_LIB_NAME=tbb.lib;REQUIRE_IOSTREAM;AW_NEW_IOSTREAMS;Bits64_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Program Files\Mega-Nerd\libsndfile\include;C:\Program Files\FFTW\Visual Studio 2012;C:\Program Files\Autodesk\Maya2015\include;.;..\..\..\include;..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Public\Documents\Libraries\C++\boost_1_59_0;C:\Users\tim\Documents\audioAnalyzerNode;C:\Program Files\Mega-Nerd\libsndfile\include;C:\Program Files\FFTW\Visual Studio 2012;C:\Program Files\Autodesk\Maya2015\include;.;..\..\..\include;..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -143,17 +143,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="audioAnalyzerNode.cpp" />
+    <ClCompile Include="DFFT.cpp" />
     <ClCompile Include="MayaException.cpp" />
     <ClCompile Include="plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="audioAnalyzerNode.h" />
+    <ClInclude Include="DFFT.h" />
     <ClInclude Include="MayaException.h" />
     <ClInclude Include="plugin.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="To Do List.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
