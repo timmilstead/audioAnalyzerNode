@@ -383,12 +383,12 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleRateAttr,&status));
 		int sampleRate = dataHandle.asInt();
 
-		float fftSampleSize = 1024;
+		long fftSampleSize = 1024;
 		float spectralLineFrequencyResolution = static_cast<float>(sampleRate) / static_cast<float>(fftSampleSize);
 
 
 		long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
-		long startIndexNo = middleIndexNo - (fftSampleSize / 2);
+		long startIndexNo = middleIndexNo - static_cast<long>(fftSampleSize / 2.0);
 		long finishIndexNo = startIndexNo + fftSampleSize;
 
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(dataAttr,&status));
