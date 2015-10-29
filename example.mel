@@ -12,16 +12,21 @@ file -import -type "audio"  -ignoreVersion -ra true -mergeNamespacesOnClash fals
 
 string $lambert1 = `createNode lambert`;
 setAttr ($lambert1 + ".color") 1 0 0;
+setAttr "lambert1.transparency" -type double3 0.25 0.25 0.25;
 polyCube -ch on -o on -cuv 4;
 hyperShade -assign $lambert1;
+setAttr "pCube1.scale" -type double3 1.05 1.05 1.05;
 
 string $lambert2 = `createNode lambert`;
 setAttr ($lambert2 + ".color") 0 1 0;
+setAttr "lambert2.transparency" -type double3 0.25 0.25 0.25;
 polyCube -ch on -o on -cuv 4 ;
 hyperShade -assign $lambert2;
+setAttr "pCube2.scale" -type double3 1.1 1.1 1.1;
 
 string $lambert3 = `createNode lambert`;
 setAttr ($lambert3 + ".color") 0 0 1;
+setAttr "lambert3.transparency" -type double3 0.25 0.25 0.25;
 polyCube -ch on -o on -cuv 4 ;
 hyperShade -assign $lambert3;
 
