@@ -84,6 +84,9 @@ public:
 	/** The time to calculate the outputs at. */
 	static MObject inputAttr;
 
+	/** The number of beats per minute (rounding on the input time) or zero if no rounding. */
+	static MObject bpmAttr;
+
 	/** The audio value (average volumne of all channels) at the current input time. Output attribute. */
 	static MObject outputAttr;
 
