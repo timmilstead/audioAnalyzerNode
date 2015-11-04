@@ -26,7 +26,8 @@ expression -s ($cubeMaterial+".colorG = sin(audioAnalyzer1.middle)");
 expression -s ($cubeMaterial+".colorB = sin(audioAnalyzer1.high)");
 
 playbackOptions -maxTime 10000;
-//setAttr "perspShape.backgroundColor" -type double3 1 1 1 ;
-//setAttr "perspShape.focalLength" 18.0;
-//setAttr "persp.translate" -type double3 1.2 1.3 1.8;
+
+setAttr "perspShape.backgroundColor" -type double3 1 1 1 ;
+setAttr "perspShape.focalLength" 18.0;
+setAttr "persp.translate" -type double3 1.2 1.3 1.8;
 
