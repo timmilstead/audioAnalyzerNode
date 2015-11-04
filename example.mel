@@ -8,8 +8,18 @@ setAttr "audioAnalyzer1.highScale" 200;
 setAttr "audioAnalyzer1.bpm" 420;
 
 // Change audio paths to match
-setAttr -type "string" audioAnalyzer1.audio "C:\\Users\\tim\\Documents\\audioAnalyzerNode\\Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
-file -import -type "audio"  -ignoreVersion -ra true -mergeNamespacesOnClash false -namespace "Gorowski_-_01_-_Universal_Warrior_Special_Edition" -options "o=0"  -pr "C:/Users/tim/Documents/audioAnalyzerNode/Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
+
+// Windows:
+//setAttr -type "string" audioAnalyzer1.audio "C:\\Users\\tim\\Documents\\audioAnalyzerNode\\Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
+
+// Linux:
+setAttr -type "string" audioAnalyzer1.audio "/home/tim/Documents/audioAnalyzerNode/Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
+
+// Windows:
+//file -import -type "audio"  -ignoreVersion -ra true -mergeNamespacesOnClash false -namespace "Gorowski_-_01_-_Universal_Warrior_Special_Edition" -options "o=0"  -pr "C:/Users/tim/Documents/audioAnalyzerNode/Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
+
+// Linux:
+file -import -type "audio"  -ignoreVersion -ra true -mergeNamespacesOnClash false -namespace "Gorowski_-_01_-_Universal_Warrior_Special_Edition" -options "o=0"  -pr "/home/tim/Documents/audioAnalyzerNode/Gorowski_-_01_-_Universal_Warrior_Special_Edition.wav";
 
 string $cubeMaterial = `createNode lambert -name cubeMaterial`;
 polyCube -ch on -o on -w 1 -h 1 -d 1 -cuv 4;
