@@ -22,6 +22,7 @@ MObject audioAnalyzer::highScaleAttr;
 MObject audioAnalyzer::sizeAttr;
 MObject audioAnalyzer::sampleRateAttr;
 MObject audioAnalyzer::sampleSizeAttr;
+MObject audioAnalyzer::bpmAttr;
 
 // -------- Functions --------
 
@@ -94,6 +95,10 @@ void audioAnalyzer::createInputAttributes()
 
 	MTime defaultTime(0.0);
 	ASSERT_PASSED_MSTATUS(inputAttr = unitAttrFn.create("input","i",defaultTime,&status));
+
+	ASSERT_PASSED_MSTATUS(bpmAttr = numAttrFn.create("bpm","bpm",MFnNumericData::kInt, 0, &status));
+
+
 }
 
 /** Create intermediate attributes that are affected by the input attributes and affect the output attributes. */
@@ -162,6 +167,7 @@ void audioAnalyzer::addAttributes()
 	ASSERT_RETURN_MSTATUS(addAttribute(sizeAttr ));
 	ASSERT_RETURN_MSTATUS(addAttribute(sampleRateAttr ));
 	ASSERT_RETURN_MSTATUS(addAttribute(sampleSizeAttr ));
+	ASSERT_RETURN_MSTATUS(addAttribute(bpmAttr ));
 }
 
 void audioAnalyzer::affectAttributes()
@@ -189,6 +195,11 @@ void audioAnalyzer::affectAttributes()
 	ASSERT_RETURN_MSTATUS(attributeAffects(inputAttr, lowAttr ));
 	ASSERT_RETURN_MSTATUS(attributeAffects(inputAttr, midAttr ));
 	ASSERT_RETURN_MSTATUS(attributeAffects(inputAttr, highAttr ));
+
+	ASSERT_RETURN_MSTATUS(attributeAffects(bpmAttr, outputAttr ));
+	ASSERT_RETURN_MSTATUS(attributeAffects(bpmAttr, lowAttr ));
+	ASSERT_RETURN_MSTATUS(attributeAffects(bpmAttr, midAttr ));
+	ASSERT_RETURN_MSTATUS(attributeAffects(bpmAttr, highAttr ));
 
 	ASSERT_RETURN_MSTATUS(attributeAffects(scaleAttr, outputAttr ));
 	ASSERT_RETURN_MSTATUS(attributeAffects(lowScaleAttr, lowAttr ));
@@ -378,7 +389,18 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 	{
 
 		ASSERT_PASSED_MSTATUS( dataHandle = dataBlock.inputValue(inputAttr,&status));
-		MTime time = dataHandle.asTime();
+		MTime mTime = dataHandle.asTime();
+		float time = mTime.as(MTime::kSeconds);
+
+		ASSERT_PASSED_MSTATUS( dataHandle = dataBlock.inputValue(bpmAttr,&status));
+		int bpm = dataHandle.asInt();
+
+		if (bpm != 0)
+		{
+			float resolution = 60.0 / static_cast<float>(bpm);
+			float temp = int(time / resolution);
+			time = temp * resolution;
+		}
 
 		ASSERT_PASSED_MSTATUS(dataHandle = dataBlock.inputValue(sampleRateAttr,&status));
 		int sampleRate = dataHandle.asInt();
@@ -387,7 +409,7 @@ void audioAnalyzer::computePowerSpectrum(const MPlug& plug, MDataBlock& dataBloc
 		float spectralLineFrequencyResolution = static_cast<float>(sampleRate) / static_cast<float>(fftSampleSize);
 
 
-		long middleIndexNo = static_cast<long>(time.as(MTime::kSeconds) * static_cast<double>(sampleRate));
+		long middleIndexNo = static_cast<long>(time * static_cast<double>(sampleRate));
 		long startIndexNo = middleIndexNo - static_cast<long>(fftSampleSize / 2.0);
 		long finishIndexNo = startIndexNo + fftSampleSize;
 
