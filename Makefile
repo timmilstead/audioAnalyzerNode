@@ -1,23 +1,48 @@
+# Default rule: $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)
+
 CC = /opt/gcc412/bin/gcc412
-C++ = /opt/gcc412/bin/g++412
+CXX = /opt/gcc412/bin/g++412
+LD = /opt/gcc412/bin/g++412
+RM = rm -f
 
-CFLAGS = -DBits64_ -m64 -DUNIX -D_BOOL -DLINUX -DFUNCPROTO -D_GNU_SOURCE \
-         -DLINUX_64 -fPIC \
-         -fno-strict-aliasing -DREQUIRE_IOSTREAM -O3 -Wall \
-         -Wno-multichar -Wno-comment -Wno-sign-compare -funsigned-char \
-         -pthread -I/usr/autodesk/maya2015-x64/include
+INCLUDES = -I./ -I/usr/X11R6/include -I/usr/autodesk/maya2015-x64/include
+LDFLAGS = -L/usr/autodesk/maya2015-x64/lib -lOpenMaya -lsndfile -lfftw3f -Wl,-Bsymbolic -shared
 
-C++FLAGS = $(CFLAGS) $(WARNFLAGS) -Wno-deprecated -Wno-reorder \
-		-ftemplate-depth-25 -fno-gnu-keywords -I/usr/autodesk/maya2015-x64/include
+# Preprocessor Flags
 
-INCLUDES	= -I$(SRCDIR) -I$(DEVKIT_INCLUDE) -I/usr/X11R6/include -I/usr/autodesk/maya2015-x64/include
+CPPFLAGS:=$(CPPFLAGS) -DBits64
+CPPFLAGS:=$(CPPFLAGS) -D_BOOL
+CPPFLAGS:=$(CPPFLAGS) -DUNIX
+CPPFLAGS:=$(CPPFLAGS) -DLINUX
+CPPFLAGS:=$(CPPFLAGS) -DLINUX_64
+CPPFLAGS:=$(CPPFLAGS) -DFUNCPROTO
+CPPFLAGS:=$(CPPFLAGS) -D_GNU_SOURCE
+CPPFLAGS:=$(CPPFLAGS) -DREQUIRE_IOSTREAM
 
-%.o : %.cpp
-	$(C++) -c $(C++FLAGS) $(INCLUDES) $< -o $@
+# C++ Compilation Flags
 
-all : plugin
+CXXFLAGS:=$(CXXFLAGS) -m64
+CXXFLAGS:=$(CXXFLAGS) -fPIC
+CXXFLAGS:=$(CXXFLAGS) -fno-strict-aliasing
+CXXFLAGS:=$(CXXFLAGS) -O3
+CXXFLAGS:=$(CXXFLAGS) -Wall
+CXXFLAGS:=$(CXXFLAGS) -Wno-multichar
+CXXFLAGS:=$(CXXFLAGS) -Wno-comment
+CXXFLAGS:=$(CXXFLAGS) -Wno-sign-compare
+CXXFLAGS:=$(CXXFLAGS) -funsigned-char
+CXXFLAGS:=$(CXXFLAGS) -pthread
+CXXFLAGS:=$(CXXFLAGS) -L/usr/autodesk/maya2015-x64/lib
+CXXFLAGS:=$(CXXFLAGS) $(INCLUDES)
+CXXFLAGS:=$(CXXFLAGS) -Wno-deprecated
+CXXFLAGS:=$(CXXFLAGS) -Wno-reorder
+CXXFLAGS:=$(CXXFLAGS) -ftemplate-depth-25
+CXXFLAGS:=$(CXXFLAGS) -fno-gnu-keywords
 
-plugin : audioAnalyzer.mll
+all: audioAnalyzer.so
 
-audioAnalyzer.mll : audioAnalyzerNode.o MayaException.o plugin.o
+clean:
+	$(RM) *.o *.so
+
+audioAnalyzer.so : audioAnalyzerNode.o MayaException.o plugin.o DFFT.o
+	$(LD) -o $@ $(LDFLAGS) $^
 
